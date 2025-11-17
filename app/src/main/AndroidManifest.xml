@@ -23,6 +23,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OOS_Project" />
+        <activity
+            android:name=".ScheduleAddActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OOS_Project" />
+        <activity
+            android:name=".ScheduleListActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OOS_Project" />
+        <activity
+            android:name=".ChecklistActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OOS_Project" />
+        <activity
+            android:name=".ExpenseActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OOS_Project" />
+        <activity
+            android:name=".TestScreenActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OOS_Project" />
     </application>
 
 </manifest>
