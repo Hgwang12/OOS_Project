@@ -47,6 +47,10 @@
             android:name=".TestScreenActivity"
             android:exported="false"
             android:theme="@style/Theme.OOS_Project" />
+        <activity
+            android:name=".TravelDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.OOS_Project" />
     </application>
 
 </manifest>
