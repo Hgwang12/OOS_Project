@@ -168,7 +168,10 @@ class ScheduleListActivity : ComponentActivity() {
             // Scaffold의 본문 영역
             // paddingValues는 TopAppBar와 FloatingActionButton의 높이만큼의 패딩을 제공합니다
             Column(
-                    modifier = Modifier.padding(paddingValues).padding(horizontal = 16.dp)
+                    modifier =
+                            Modifier.fillMaxSize()
+                                    .padding(paddingValues)
+                                    .padding(horizontal = 16.dp)
             ) {
                 // 일정 목록 표시
                 // scheduleList의 각 Schedule 객체에 대해 ScheduleCard를 생성하여 표시합니다
