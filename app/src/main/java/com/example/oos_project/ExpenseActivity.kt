@@ -4,144 +4,217 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.oos_project.data.model.Expense
 import com.example.oos_project.ui.theme.OOS_ProjectTheme
 
-/**
- * ================================================== 📌 ExpenseActivity - 예산 관리 화면
- * ==================================================
- *
- * 역할:
- * - 특정 여행의 지출 항목을 추가하고 목록을 표시하는 화면입니다
- * - 사용자가 지출 항목명, 금액, 날짜를 입력하면 AppData.expenseList에 Expense 객체를 추가합니다
- *
- * 데이터 흐름:
- * - Intent로 "travelId"를 받아서 새로 생성하는 Expense 객체의 travelId 필드에 저장합니다
- * - travelId는 이 지출이 어떤 여행에 속하는지를 나타냅니다
- * - 사용자가 입력한 label(항목명), amount(금액), date(날짜)를 사용하여 Expense 객체를 생성합니다
- * - 생성한 Expense 객체를 AppData.expenseList에 추가합니다
- * - 화면 하단에 travelId로 필터링한 지출 목록을 표시합니다
- *
- * 화면 이동:
- * - TravelDetailActivity 또는 TestScreenActivity에서 이 화면으로 이동합니다 (travelId 전달 또는 미전달)
- * - 뒤로가기 버튼을 누르면 이전 화면으로 돌아갑니다
- */
 class ExpenseActivity : ComponentActivity() {
-    /**
-     * Activity가 생성될 때 호출되는 함수
-     * - setContent로 Compose UI를 설정합니다
-     * - ExpenseUI() Composable 함수를 호출하여 화면을 구성합니다
-     */
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { OOS_ProjectTheme { ExpenseUI() } }
+        setContent { OOS_ProjectTheme { ExpenseUI(onBack = { finish() }) } }
     }
 
-    /**
-     * ================================================== ExpenseUI - 예산 관리 UI를 표시하는 Composable 함수
-     * ==================================================
-     *
-     * 역할:
-     * - 사용자가 지출 정보를 입력할 수 있는 TextField들을 제공합니다
-     * - 저장 버튼을 클릭하면 입력한 정보로 Expense 객체를 생성하여 AppData.expenseList에 추가합니다
-     * - 화면 하단에 travelId로 필터링한 지출 목록을 표시합니다
-     *
-     * 데이터 입력 및 저장:
-     * - travelId: Intent로 받은 값으로, 새로 생성하는 Expense 객체의 travelId 필드에 저장됩니다
-     * - label: 사용자가 입력하는 지출 항목명 (TextField로 입력, 예: "식비", "숙박비")
-     * - amount: 사용자가 입력하는 지출 금액 (TextField로 입력, Int 타입으로 변환 필요)
-     * - date: 사용자가 입력하는 지출 날짜 (TextField로 입력, 예: "2024-01-15")
-     * - 저장 버튼 클릭 시: Expense(id, travelId, label, amount, date) 객체를 생성하여 AppData.expenseList.add()로
-     * 추가
-     *
-     * 데이터 표시:
-     * - AppData.expenseList에서 travelId로 필터링한 지출 목록을 표시합니다
-     * - travelId가 비어있으면 모든 지출을 표시하고, 있으면 해당 여행의 지출만 표시합니다
-     */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ExpenseUI() {
-        // Intent로 전달받은 travelId를 가져옵니다
-        // "travelId"라는 키로 저장된 값을 읽고, 없으면 빈 문자열("")을 사용합니다
-        // travelId는 새로 생성하는 Expense 객체의 travelId 필드에 저장되어, 이 지출이 어떤 여행에 속하는지 나타냅니다
+    fun ExpenseUI(onBack: () -> Unit) {
         val travelId = intent.getStringExtra("travelId") ?: ""
+        val expenses = remember { AppData.expenseList.filter { it.travelId == travelId }.toMutableStateList() }
+        val topBarColor = Color(0xFFE3F2FD)
 
-        // Scaffold는 Material Design의 기본 화면 구조입니다
-        Scaffold(
-                topBar = {
-                    // 화면 상단에 표시되는 앱 바
-                    TopAppBar(
-                            title = { Text("예산 관리") },
-                            navigationIcon = {
-                                // 뒤로가기 버튼
-                                // 클릭하면 finish()를 호출하여 현재 Activity를 종료하고 이전 화면으로 돌아갑니다
-                                IconButton(onClick = { finish() }) {
-                                    Icon(
-                                            Icons.AutoMirrored.Filled.ArrowBack,
-                                            contentDescription = "뒤로"
-                                    )
-                                }
-                            }
-                    )
+        var label by remember { mutableStateOf("") }
+        var amountString by remember { mutableStateOf("") }
+        var date by remember { mutableStateOf("") }
+
+        val addExpense: () -> Unit = {
+            val amount = amountString.toIntOrNull() ?: 0
+            if (label.isNotEmpty() && amount > 0 && date.isNotEmpty()) {
+                val newExpense = Expense(
+                    id = "expense-${AppData.expenseList.size + 1}",
+                    travelId = travelId,
+                    label = label,
+                    amount = amount,
+                    date = date
+                )
+                AppData.expenseList.add(newExpense)
+                if (travelId.isEmpty() || newExpense.travelId == travelId) {
+                    expenses.add(newExpense)
                 }
-        ) {
-            // Scaffold의 본문 영역
-            // it은 TopAppBar의 높이만큼의 패딩 값입니다
-            Column(modifier = Modifier.padding(it)) {
-                // TODO: 여기서부터 팀원이 이 페이지의 UI 구성
-
-                // travelId를 전달받아 지출 항목 추가
-                // - travelId 변수는 이미 위에서 Intent로부터 가져왔습니다
-                // - 이 travelId는 새로 생성하는 Expense 객체의 travelId 필드에 저장됩니다
-
-                // TextField로 label, amount, date 입력받기
-                // - remember { mutableStateOf("") }를 사용하여 각 입력 필드의 상태를 관리합니다
-                // - 예: var label by remember { mutableStateOf("") }
-                // - 예: var amount by remember { mutableStateOf("") }
-                // - 예: var date by remember { mutableStateOf("") }
-                // - TextField의 value와 onValueChange를 연결하여 사용자 입력을 실시간으로 저장합니다
-                // - label: 지출 항목명을 입력받습니다 (예: "식비", "숙박비", "교통비")
-                // - amount: 지출 금액을 입력받습니다 (예: "50000", "100000")
-                // - date: 지출 날짜를 입력받습니다 (예: "2024-01-15", "2024-01-20")
-
-                // Button으로 지출 추가 → AppData.expenseList에 Expense 객체 추가
-                // - 저장 버튼을 클릭하면:
-                //   1. 입력한 label, amount, date 값을 가져옵니다
-                //   2. amount를 Int 타입으로 변환합니다 (amount.toIntOrNull() ?: 0)
-                //   3. Expense 객체를 생성합니다:
-                //      Expense(
-                //          id = UUID.randomUUID().toString() 또는 AppData.expenseList.size + 1 등으로 고유
-                // ID 생성,
-                //          travelId = travelId (Intent로 받은 값),
-                //          label = label (사용자 입력),
-                //          amount = amount.toIntOrNull() ?: 0 (사용자 입력, Int로 변환),
-                //          date = date (사용자 입력)
-                //      )
-                //   4. AppData.expenseList.add(newExpense)로 리스트에 추가합니다
-                //   5. 입력 필드를 초기화합니다 (label = "", amount = "", date = "")
-
-                // 지출 목록 표시 (travelId로 필터링)
-                // - AppData.expenseList에서 travelId로 필터링한 지출 목록을 표시합니다
-                // - travelId가 비어있으면 모든 지출을 표시하고, 있으면 해당 여행의 지출만 표시합니다
-                // - 예: val expenseList = if (travelId.isNotEmpty()) {
-                //          AppData.expenseList.filter { it.travelId == travelId }
-                //        } else {
-                //          AppData.expenseList.toList()
-                //        }
-                // - expenseList.forEach { expense -> ... }로 각 지출을 카드나 리스트 아이템으로 표시합니다
-                // - 각 지출 카드에는 label(항목명), amount(금액), date(날짜)를 표시합니다
+                label = ""
+                amountString = ""
+                date = ""
             }
+        }
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = topBarColor),
+                    title = { Text("예산 관리", fontWeight = FontWeight.Bold) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "뒤로"
+                            )
+                        }
+                    }
+                )
+            },
+            containerColor = Color(0xFFF5F5F5)
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            "새 지출 추가 (여행 ID: ${if (travelId.isNotEmpty()) travelId else "전체"})",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = label,
+                            onValueChange = { label = it },
+                            label = { Text("항목명 (예: 숙소, 식비)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = amountString,
+                            onValueChange = { amountString = it.filter { char -> char.isDigit() } },
+                            label = { Text("금액 (원)") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        OutlinedTextField(
+                            value = date,
+                            onValueChange = { date = it },
+                            label = { Text("날짜 (예: 2025-12-05)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = addExpense,
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = label.isNotEmpty() && amountString.toIntOrNull() != null && date.isNotEmpty()
+                        ) {
+                            Text("지출 항목 추가")
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                Divider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = Color.LightGray.copy(alpha = 0.5f)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    "지출 목록 (총 ${expenses.size}개)",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = Color.DarkGray
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(expenses) { expense ->
+                        ExpenseListItem(expense = expense)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpenseListItem(expense: Expense) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = expense.label,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 17.sp,
+                    color = Color.Black,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "${String.format("%,d", expense.amount)}원",
+                    color = Color(0xFF2E7D32),
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 17.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "${expense.date} (여행 ID: ${expense.travelId})",
+                fontSize = 13.sp,
+                color = Color.Gray
+            )
         }
     }
 }

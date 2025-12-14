@@ -1,5 +1,4 @@
 plugins {
-    //id("com.android.application")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -8,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.oos_project"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.oos_project"
