@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.oos_project.data.model.Schedule
 import com.example.oos_project.ui.theme.OOS_ProjectTheme
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.UUID
 
 class ScheduleAddActivity : ComponentActivity() {
@@ -101,14 +102,18 @@ class ScheduleAddActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     onClick = {
                         val newId = UUID.randomUUID().toString()
-                        val newSchedule = Schedule(
-                            id = newId,
-                            travelId = travelId,
-                            title = title,
-                            time = time,
-                            memo = memo
+                        val scheduleMap = hashMapOf(
+                            "id" to newId,
+                            "travelId" to travelId,
+                            "title" to title,
+                            "time" to time,
+                            "memo" to memo
                         )
-                        AppData.scheduleList.add(newSchedule)
+
+                        val db = FirebaseFirestore.getInstance()
+                        db.collection("schedules")
+                            .document(newId)
+                            .set(scheduleMap)
                         finish()
                     }
                 ) {

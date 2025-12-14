@@ -25,6 +25,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,8 +35,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.example.oos_project.data.model.Schedule
 import com.example.oos_project.ui.theme.OOS_ProjectTheme
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ScheduleListActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -48,15 +52,32 @@ class ScheduleListActivity : ComponentActivity() {
     @Composable
     fun ScheduleListUI() {
         val travelId = intent.getStringExtra("travelId") ?: ""
+        var scheduleList by remember { mutableStateOf(emptyList<Schedule>()) }
 
-        var scheduleList by remember {
-            mutableStateOf(
-                if (travelId.isNotEmpty()) {
-                    AppData.scheduleList.filter { it.travelId == travelId }
-                } else {
-                    AppData.scheduleList.toList()
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+            val db = FirebaseFirestore.getInstance()
+            val collection = db.collection("schedules")
+            val query = if (travelId.isNotEmpty()) {
+                collection.whereEqualTo("travelId", travelId)
+            } else {
+                collection
+            }
+
+            query.get().addOnSuccessListener { result -> val tempList = mutableListOf<Schedule>()
+
+                for (document in result) {
+                    val id = document.getString("id") ?: ""
+                    val tId = document.getString("travelId") ?: ""
+                    val title = document.getString("title") ?: ""
+                    val time = document.getString("time") ?: ""
+                    val memo = document.getString("memo") ?: ""
+
+                    val s = Schedule(id, tId, title, time, memo)
+                    tempList.add(s)
                 }
-            )
+
+                scheduleList = tempList
+            }
         }
 
         val travel = if (travelId.isNotEmpty()) {
