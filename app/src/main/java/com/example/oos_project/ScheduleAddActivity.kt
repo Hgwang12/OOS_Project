@@ -1,5 +1,6 @@
 package com.example.oos_project
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -114,7 +115,10 @@ class ScheduleAddActivity : ComponentActivity() {
                         db.collection("schedules")
                             .document(newId)
                             .set(scheduleMap)
-                        finish()
+                        val intent =
+                            Intent(this@ScheduleAddActivity, ScheduleListActivity::class.java)
+                        intent.putExtra("travelId", travelId)
+                        startActivity(intent)
                     }
                 ) {
                     Text("저장하기")
