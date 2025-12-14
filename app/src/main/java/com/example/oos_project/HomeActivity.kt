@@ -5,21 +5,37 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.oos_project.AppData.travelList
+import com.example.oos_project.data.model.Travel
 import com.example.oos_project.ui.theme.OOS_ProjectTheme
 
 /**
@@ -120,8 +136,93 @@ class HomeActivity : ComponentActivity() {
                         // 나중에 내용 추가할 곳
                         // TODO: 여기서 AppData.travelList를 읽어서 여행 목록을 표시합니다
                         // TODO: 각 여행 카드를 클릭하면 TravelDetailActivity로 이동하고 travelId를 전달합니다
+                        val travelList = AppData.scheduleList
+
+                        if(travelList.isEmpty()){
+                            ShowEmptyScreen()
+                        }
+                        else{
+                            ShowScreen(onCardClick = {
+                                val intent = Intent(this@HomeActivity, TravelDetailActivity::class.java)
+                                intent.putExtra("travelId", it.id)
+                                startActivity(intent)
+                            })
+                        }
                     }
                 }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ShowEmptyScreen(){
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "등록된 일정이 없습니다.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Gray
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "새로운 여행을 추가해보세요!",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.LightGray
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowScreen(onCardClick: (Travel) -> Unit){
+
+    val tokyoImg = painterResource(id = R.drawable.tokyopic)
+
+    travelList.forEach { travel ->      //travelList에 있는 여행들을 카드형식으로 출력
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            onClick = { onCardClick(travel) }
+        ) {
+            Column(modifier = Modifier.padding(16.dp))
+            {
+                Image(
+                    painter = tokyoImg,
+                    contentDescription = "tokyo picture icon",
+                    modifier = Modifier.fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                )
+
+                Spacer(modifier = Modifier.height(5.dp))
+
+                Text(   //여행 제목
+                    text = travel.title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(      //여행 지역
+                    text = "지역: ${travel.location}",
+                    fontSize = 16.sp,
+                    color = Color.DarkGray
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(       //여행 날짜
+                    text = "날짜: ${travel.startDate} ~ ${travel.endDate}",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
             }
         }
     }
