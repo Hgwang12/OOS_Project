@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.oos_project.data.model.Schedule
 import com.example.oos_project.ui.theme.OOS_ProjectTheme
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.UUID
@@ -46,7 +45,7 @@ class ScheduleAddActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ScheduleAddUI() {
-        val travelId = intent.getStringExtra("travelId") ?: ""
+        val travelId = intent.getStringExtra("travelId") ?: ""      //이전 화면에서 넘겨준 travelId 데이터를 받아옴
         val topBarColor = Color(0xFFE3F2FD)
 
         Scaffold(
@@ -79,7 +78,7 @@ class ScheduleAddActivity : ComponentActivity() {
                     title = "일정 제목",
                     inputex = "예: 맛집 탐방",
                     input = title,
-                    onValueChange = { title = it }
+                    onValueChange = { title = it }      //사용자가 입력할 때마다 상테 업데이트
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -103,7 +102,7 @@ class ScheduleAddActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxWidth().height(50.dp),
                     onClick = {
                         val newId = UUID.randomUUID().toString()
-                        val scheduleMap = hashMapOf(
+                        val scheduleMap = hashMapOf(        //저장할 데이터를 key-value 형태로 묶음
                             "id" to newId,
                             "travelId" to travelId,
                             "title" to title,
@@ -112,10 +111,10 @@ class ScheduleAddActivity : ComponentActivity() {
                         )
 
                         val db = FirebaseFirestore.getInstance()
-                        db.collection("schedules")
+                        db.collection("schedules")      //Firestore의 schedules 컬렉션에 문서 저장
                             .document(newId)
                             .set(scheduleMap)
-                        val intent =
+                        val intent =                                   //저장 후 일정 목록 화면으로 이동
                             Intent(this@ScheduleAddActivity, ScheduleListActivity::class.java)
                         intent.putExtra("travelId", travelId)
                         startActivity(intent)

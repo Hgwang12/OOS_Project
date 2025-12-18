@@ -63,88 +63,87 @@ class HomeActivity : ComponentActivity() {
                     }
                 ) { paddingValues ->
                     Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                        val travelList = AppData.scheduleList
+                        val travelList = AppData.travelList
 
                         if (travelList.isEmpty()) {
                             ShowEmptyScreen()
                         } else {
-                            ShowScreen(onCardClick = {
-                                val intent = Intent(this@HomeActivity, TravelDetailActivity::class.java)
-                                intent.putExtra("travelId", it.id)
-                                startActivity(intent)
-                            })
+                            ShowScreen()
                         }
                     }
                 }
             }
         }
     }
-}
-
-@Composable
-fun ShowEmptyScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "등록된 일정이 없습니다.",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Gray
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "새로운 여행을 추가해보세요!",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.LightGray
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ShowScreen(onCardClick: (Travel) -> Unit) {
-    val tokyoImg = painterResource(id = R.drawable.tokyopic)
-
-    travelList.forEach { travel ->
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            onClick = { onCardClick(travel) }
+    @Composable
+    fun ShowEmptyScreen() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Image(
-                    painter = tokyoImg,
-                    contentDescription = "tokyo picture icon",
-                    modifier = Modifier.fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                )
+            Text(
+                text = "등록된 일정이 없습니다.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "새로운 여행을 추가해보세요!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.LightGray
+            )
+        }
+    }
 
-                Spacer(modifier = Modifier.height(5.dp))
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun ShowScreen() {
+        val tokyoImg = painterResource(id = R.drawable.tokyopic)        //res에서 도쿄 이미지 로드
 
-                Text(
-                    text = travel.title,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+        travelList.forEach { travel ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                onClick = {
+                    val intent = Intent(this@HomeActivity, TravelDetailActivity::class.java)
+                    intent.putExtra("travelId", travel.id)
+                    startActivity(intent)
+                }
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Image(
+                        painter = tokyoImg,
+                        contentDescription = "tokyo picture icon",
+                        modifier = Modifier.fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                    )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
 
-                Text(
-                    text = "지역: ${travel.location}",
-                    fontSize = 16.sp,
-                    color = Color.DarkGray
-                )
+                    Text(
+                        text = travel.title,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "날짜: ${travel.startDate} ~ ${travel.endDate}",
-                    fontSize = 14.sp,
-                    color = Color.Gray
-                )
+                    Text(
+                        text = "지역: ${travel.location}",
+                        fontSize = 16.sp,
+                        color = Color.DarkGray
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "날짜: ${travel.startDate} ~ ${travel.endDate}",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
             }
         }
     }
